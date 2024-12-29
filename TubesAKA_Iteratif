@@ -1,0 +1,80 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+const NMAX = 1000
+
+type barang struct {
+	nama  string
+	id    int
+	harga float64
+	stok  int
+}
+
+var tabBarang [NMAX]barang
+var jumlahBarang int
+
+func main() {
+	// Inisialisasi data
+	for i := 0; i < 1000; i++ {
+		tabBarang[i] = barang{
+			nama:  fmt.Sprintf("Barang %d", i+1),
+			id:    i + 1,
+			harga: float64((i + 1) * 100),
+			stok:  10,
+		}
+	}
+	jumlahBarang = 1000
+
+	var targetPrice float64
+	var iterations int
+
+	// Input dari pengguna
+	fmt.Print("Masukkan harga barang yang ingin dicari: ")
+	fmt.Scan(&targetPrice)
+	fmt.Print("Masukkan jumlah pengulangan untuk perhitungan waktu: ")
+	fmt.Scan(&iterations)
+
+	// Pastikan data barang terurut
+	sortBarangByHarga()
+
+	// Iterative Search
+	start := time.Now()
+	for i := 0; i < iterations; i++ {
+		findPriceIterative(targetPrice)
+	}
+	elapsed := time.Since(start)
+
+	fmt.Printf("[Iterative] Total waktu eksekusi: %d ns (%d µs)\n", elapsed.Nanoseconds(), elapsed.Microseconds())
+	fmt.Printf("[Iterative] Rata-rata waktu per iterasi: %d ns\n", elapsed.Nanoseconds()/int64(iterations))
+}
+
+// Iterative Binary Search
+func findPriceIterative(price float64) (int, bool) {
+	low, high := 0, jumlahBarang-1
+	for low <= high {
+		mid := (low + high) / 2
+		if tabBarang[mid].harga == price {
+			return mid, true
+		} else if tabBarang[mid].harga < price {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return -1, false
+}
+
+// Helper function to sort barang by harga (ascending)
+func sortBarangByHarga() {
+	for i := 0; i < jumlahBarang-1; i++ {
+		for j := 0; j < jumlahBarang-i-1; j++ {
+			if tabBarang[j].harga > tabBarang[j+1].harga {
+				tabBarang[j], tabBarang[j+1] = tabBarang[j+1], tabBarang[j]
+			}
+		}
+	}
+}
